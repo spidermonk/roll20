@@ -128,8 +128,9 @@ var hitdice = hitdice || (function() {
             state.hitdice = {};
 
         var hpBar = 'bar1';
-        if(!_.isUndefined(state.health) || !_.isUndefined(state.health.hpBar))
-            hpBar = state.health.hpBar;
+        if(!_.isUndefined(state.health))
+            if(!_.isUndefined(state.health.hpBar))
+                hpBar = state.health.hpBar;
 
         if(_.isUndefined(state.hitdice.hpBar))
             state.hitdice.hpBar = hpBar;

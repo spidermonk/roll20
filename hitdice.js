@@ -7,12 +7,12 @@ var hitdice = hitdice || (function() {
         var tokens = [];
         
         if(!_.isUndefined(msg.selected) && msg.selected.length > 0) {
-            log("Using selected tokens only");
+            log("Calculating hit points using selected tokens only");
             _.each(msg.selected, function(t) {
                 tokens.push(getTokenForSelected(t));
             });
         } else {
-            log("Using all tokens on players page");
+            log("Calculating hit points using all tokens on players page");
             tokens = findObjs({                              
               _pageid: Campaign().get("playerpageid"),                              
               _type: "graphic",
@@ -20,11 +20,19 @@ var hitdice = hitdice || (function() {
             });                
         }
         
+        log("Calculating hit points over " + tokens.length + " potential tokens");
+        
         var monsters = tokens.filter(function(t) {
             var characterId = t.get("represents");
-            return !_.isUndefined(t) && 
+            var monster = !_.isUndefined(t) && 
                         !_.isUndefined(characterId) && characterId !== "" &&
                         isCharacterNpc(t);
+            if(!monster) 
+                log("Excluding token " + t.get("_id") + " for character " + characterId);
+            else 
+                log("Including token " + t.get("_id") + " for character " + characterId);
+                
+            return monster;
         });
         
         if(clear) {
@@ -54,23 +62,30 @@ var hitdice = hitdice || (function() {
 
     var isCharacterNpc = function(token) {
         var isNpc = getAttrByName(token.get("represents"), "npc", "current");
+        log("NPC flag for token " + token.get("_id") + " is " + isNpc);
         return isNpc === "1";
     }
     
     var updateTokenHitpoints = function(token, override, clear) {
         var hpBar = state.hitdice.hpBar;
-                    
+        log("Using bar " + hpBar + " for hit points");
+        
         if(clear) {
             var hp = {};
             hp[hpBar + "_value"] = "";
             hp[hpBar + "_max"]  = "";
             token.set(hp);
+            log("Cleared hit points for token " + token.get("_id"));
+            
         } else if(!isTokenHpSet(token) || override) {
             var hpFormula = getAttrByName(token.get("represents"), "npc_hpformula", "current");
+            log("Got hit point formula of " + hpFormula + " for token " + token.get("_id"));
+            
             if(!_.isUndefined(hpFormula)) {
                 sendChat('Hit Dice Module', '/gmroll ' + hpFormula, function(ops) {
                     var results = JSON.parse(ops[0].content);
                     var roll = parseInt(results.total, 10);
+                    log("Rolled hit points of " + roll + " for token " + token.get("_id"));
                     var hp = {};
                     hp[hpBar + "_value"] = roll;
                     hp[hpBar + "_max"]  = roll;
@@ -82,7 +97,9 @@ var hitdice = hitdice || (function() {
 
     var isTokenHpSet = function(token) {
         var hp = getTokenHitPoints(token);
-        return !_.isUndefined(hp.value) && !isNaN(hp.value);
+        var result = !_.isUndefined(hp.value) && !isNaN(hp.value);
+        log("Hit points are already set for token - will only update if override! " + token.get("_id"));
+        return result;
     }
 
     var getTokenHitPoints = function(token) {
@@ -107,6 +124,8 @@ var hitdice = hitdice || (function() {
         var option = (msgParts[1] || "").toUpperCase();
         
         if(msg.type === "api" && cmd.startsWith("!HD")) {
+            log("Hit Dice Module command " + option);
+            
             if(!playerIsGM(msg.playerid)) {
                 sendChat('Hit Dice Module', "/w " + msg.who + " only for the GM!");
                 return;

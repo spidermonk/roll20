@@ -36,3 +36,22 @@ In the chat window you can type the following command to calculate hit points fo
 * `!hd` will calculate hit points using the npc_hpformula attribute for any NPC token (selected or all) if their current HP has not been set already (token's HP bar). If they are already set then they will be left untouched. 
 * `!hd over` will do the same as `!hd` but will also calculate hit points for NPCs if their current hit points have already been effectively overriding any previous values.
 * `!hd clear` will clear the current/max hit points for the NPCs (blanking them out)
+
+# Health Module (health.js)
+The health module creates a status ring around the tokens on the board that have hit points that changes from green to red as they take damage and to black with a red X (death status) if they drop to 0 or lower. It will turn blue if their current hit points are higher than their max. Note this uses both of the token's auras so they are not available for other uses.
+
+Pre-requisites:
+* Tokens must be on the objects layer to have their health aura updated.
+* Tokens must have a max and current hit point setting either through a linked character attribute or manually
+* The tokens hit points must be set in the same token bar as configured in the Health Module (defaults to bar 1)
+
+Configuration:
+* `!health reset` resets configuration to the defaults
+* `!health on` toggles enabling/disabling the health module
+* `!health size <value>` sets the health aura size (defaults to 0.7)
+* `!health` displays help menu
+*TODO: Make health token bar configurable*
+
+Once active and enabled tokens will automatically display their health aura based on the percentage of current hit points to their maximum. This includes players and NPCs/Monsters. The auras are automatically turned on for players to see. Tokens health aura is automatically updated when hit points are adjusted.
+
+*TODO: Tokens do not automatically display upon dropping on the page for the first time, have to update/move them first*

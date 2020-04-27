@@ -63,7 +63,7 @@ var hitdice = hitdice || (function() {
     var isCharacterNpc = function(token) {
         var isNpc = getAttrByName(token.get("represents"), "npc", "current");
         log("NPC flag for token " + token.get("_id") + " is " + isNpc);
-        return isNpc === "1";
+        return isNpc === "1" || isNpc === 1;
     }
     
     var updateTokenHitpoints = function(token, override, clear) {
